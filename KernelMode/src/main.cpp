@@ -9,6 +9,14 @@ extern "C" {
 											 PSIZE_T ReturnSize);
 }
 
+void debug_print(PCSTR text) {
+#ifdef DEBUG
+	UNREFERENCED_PARAMETER(text);
+#endif // DEBUG
+
+	KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, text));
+}
+
 namespace driver {
 	namespace codes {
 		constexpr ULONG attach =
@@ -75,7 +83,6 @@ namespace driver {
 												 PsGetCurrentProcess(), request->buffer,
 												 request->size, KernelMode, &request->return_size);
 				}
-
 				break;
 
 			case codes::write:
@@ -95,16 +102,8 @@ namespace driver {
 
 		IoCompleteRequest(irp, IO_NO_INCREMENT);
 
-		return irp->IoStatus.Status;
+		return status;
 	}
-}
-
-void debug_print(PCSTR text) {
-#ifdef DEBUG
-	UNREFERENCED_PARAMETER(text);
-#endif // DEBUG
-
-	KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, text));
 }
 
 NTSTATUS driver_main(PDRIVER_OBJECT driver_object, PUNICODE_STRING registry_path) { //Actual entrypoint
